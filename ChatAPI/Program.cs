@@ -1,6 +1,7 @@
 using ChatAPI;
 using ChatAPI.Data;
-using ChatAPI.Data.Interface;
+using ChatAPI.Services;
+using ChatAPI.Services.Interface;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
