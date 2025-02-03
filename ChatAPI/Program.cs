@@ -28,6 +28,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<MongoDBService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
+//passwordhasher
+builder.Services.AddScoped<IPasswordHelper, PasswordHelper>();
 
 builder.Services.AddControllers()
     .AddJsonOptions(

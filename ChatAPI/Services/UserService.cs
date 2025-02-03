@@ -1,4 +1,5 @@
 ﻿using ChatAPI.Data;
+using ChatAPI.Extensions;
 using ChatAPI.Models;
 using ChatAPI.Services.Interface;
 using MongoDB.Driver;
@@ -8,24 +9,29 @@ namespace ChatAPI.Services
     public class UserService : IUserService
     {
         private readonly MongoDBService _mongoDBService;
+        private readonly IPasswordHelper _passwordHelper;
         private const string CollectionName = "users";
 
-        public UserService(MongoDBService mongoDBService)
+        public UserService(MongoDBService mongoDBService, IPasswordHelper passwordHelper)
         {
             _mongoDBService = mongoDBService;
+            _passwordHelper = passwordHelper;
         }
-        public async Task<User> CreateUser(User user)
+        public async Task<UserDetailDTO> CreateUser(RegisterUserDTO registerUserRequest)
         {
             try
             {
-                var checkIfEmailPresent = await _mongoDBService.GetDocumentById<User>(CollectionName, "Email", user.Email);
+                var user = registerUserRequest.ConvertRegisterRequest();
+                var checkIfEmailPresent = await _mongoDBService.GetDocumentById<User>(CollectionName, "Email", registerUserRequest.Email);
                 if (checkIfEmailPresent != null)
                 {
                     throw new Exception("Email Already Present");
                 }
                 //hashing technique before inserting in mongo
+                user.PasswordHash = _passwordHelper.HashPassword(registerUserRequest.Password);
                 await _mongoDBService.CreateDocument(CollectionName, user);
-                return await _mongoDBService.GetDocumentById<User>(CollectionName, "Email", user.Email);
+                var savedUser = await _mongoDBService.GetDocumentById<User>(CollectionName, "Email", user.Email);
+                return savedUser.ConvertUserToUserDetailDTO();
             }
             catch (Exception)
             {
@@ -33,17 +39,21 @@ namespace ChatAPI.Services
             }
         }
 
-        public async Task<User> LogInUser(User user)
+        public async Task<UserDetailDTO> LogInUser(LoginUserDTO loginUserRequest)
         {
             try
             {
-                var userLoggedIn = await _mongoDBService.GetDocumentById<User>(CollectionName, "Email", user.Email);
-                if (userLoggedIn == null)
+                var userToLogin = await _mongoDBService.GetDocumentById<User>(CollectionName, "Email", loginUserRequest.Email);
+                if (userToLogin == null)
                 {
                     throw new Exception("Email Not Present");
                 }
                 //check hashed password 
-                return userLoggedIn;
+                if (!_passwordHelper.VerifyPassword(userToLogin.PasswordHash, loginUserRequest.Password))
+                {
+                    throw new Exception("Incorrect Password");
+                }
+                return userToLogin.ConvertUserToUserDetailDTO();
             }
             catch (Exception)
             {

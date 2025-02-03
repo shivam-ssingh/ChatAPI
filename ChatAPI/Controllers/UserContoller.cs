@@ -22,14 +22,15 @@ namespace ChatAPI.Controllers
         {
             try
             {
-                var createdUser = await _userService.CreateUser(registerRequest.ConvertRegisterRequest());
+                var createdUser = await _userService.CreateUser(registerRequest);
                 return Ok(createdUser);
             }
             catch (Exception ex)
             {
                 if(ex.Message == "Email Already Present")
                 {
-                    return BadRequest(ex.Message); 
+                    //TODO: Use middleware as mentioned here https://learn.microsoft.com/en-us/aspnet/core/web-api/handle-errors?view=aspnetcore-8.0&viewFallbackFrom=aspnetcore-3.0
+                    return BadRequest(new { error = ex.Message });
                 }
                 //error handling using problem -> https://stackoverflow.com/a/68892997
                 return Problem(detail: ex.Message, statusCode: StatusCodes.Status500InternalServerError);
@@ -43,14 +44,14 @@ namespace ChatAPI.Controllers
         {
             try
             {
-                var userLogin = await _userService.LogInUser(loginRequest.ConvertLoginRequest());
+                var userLogin = await _userService.LogInUser(loginRequest);
                 return Ok(userLogin);
             }
             catch (Exception ex)
             {
                 if (ex.Message == "Email Not Present")
                 {
-                    return BadRequest(ex.Message);
+                    return BadRequest(new { error = ex.Message });
                 }
                 return Problem(detail: ex.Message, statusCode: StatusCodes.Status500InternalServerError);
             }

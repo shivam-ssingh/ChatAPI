@@ -9,9 +9,19 @@ namespace ChatAPI.Extensions
             return new User() 
             { 
                 Email = registerUserRequest.Email, 
-                Password = registerUserRequest.Password,
                 FirstName = registerUserRequest.FirstName, 
                 LastName = registerUserRequest.LastName 
+            };
+        }
+
+        public static UserDetailDTO ConvertUserToUserDetailDTO(this User user)
+        {
+            return new UserDetailDTO()
+            {
+                Id = user.Id,
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
             };
         }
 
@@ -20,7 +30,7 @@ namespace ChatAPI.Extensions
             return new User()
             {
                 Email = loginUserRequest.Email,
-                Password = loginUserRequest.Password,
+                PasswordHash = loginUserRequest.Password,
             };
         }
     }

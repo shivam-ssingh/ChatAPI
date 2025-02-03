@@ -4,9 +4,9 @@ namespace ChatAPI.Services.Interface
 {
     public interface IUserService
     {
-        Task<User> CreateUser(User user);
+        Task<UserDetailDTO> CreateUser(RegisterUserDTO registerUserRequest);
         Task<List<User>> GetAllUsers();
         Task<User> GetUserById(string id);
-        Task<User> LogInUser(User user);
+        Task<UserDetailDTO> LogInUser(LoginUserDTO loginUserRequest);
     }
 }
