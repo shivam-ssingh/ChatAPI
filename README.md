@@ -24,3 +24,7 @@ https://medium.com/@nambi2210/password-hashing-in-asp-net-core-ee377c29fa24
 > Have copied the hashing and verifying directly from official asp.net core codebase
 > TODO: See how the default implementation with ASP.NET Identity works with mongodb and make relevant changes
 https://github.dev/dotnet/AspNetCore/blob/main/src/Identity/Extensions.Core/src/PasswordHasher.cs
+
+
+new hashing changes 
+https://www.youtube.com/watch?v=J4ix8Mhi3rs
