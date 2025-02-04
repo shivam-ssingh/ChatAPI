@@ -1,4 +1,7 @@
-﻿using MongoDB.Bson;
+﻿using ChatAPI.Options;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace ChatAPI.Data
@@ -6,11 +9,13 @@ namespace ChatAPI.Data
     public class MongoDBService
     {
         private readonly IMongoDatabase _database;
+        private readonly DatabaseOptions _dbOptions;
 
-        public MongoDBService(IConfiguration config)
+        public MongoDBService(IOptions<DatabaseOptions> dbOptions)
         {
-            var client = new MongoClient(config.GetSection("MongoDBSettings:ConnectionString").Value);
-            _database = client.GetDatabase(config.GetSection("MongoDBSettings:DatabaseName").Value);
+            _dbOptions = dbOptions.Value;
+            var client = new MongoClient(_dbOptions.ConnectionString);
+            _database = client.GetDatabase(_dbOptions.DatabaseName);
         }
 
         public IMongoCollection<T> GetCollection<T>(string collectionName)

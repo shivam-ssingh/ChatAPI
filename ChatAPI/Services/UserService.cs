@@ -1,7 +1,9 @@
 ﻿using ChatAPI.Data;
 using ChatAPI.Extensions;
 using ChatAPI.Models;
+using ChatAPI.Options;
 using ChatAPI.Services.Interface;
+using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
 namespace ChatAPI.Services
@@ -10,12 +12,14 @@ namespace ChatAPI.Services
     {
         private readonly MongoDBService _mongoDBService;
         private readonly IPasswordHelper _passwordHelper;
+        private readonly JWTOptions _jwtOptions;
         private const string CollectionName = "users";
 
-        public UserService(MongoDBService mongoDBService, IPasswordHelper passwordHelper)
+        public UserService(MongoDBService mongoDBService, IPasswordHelper passwordHelper, IOptions<JWTOptions> jwtOptions)
         {
             _mongoDBService = mongoDBService;
             _passwordHelper = passwordHelper;
+            _jwtOptions = jwtOptions.Value;
         }
         public async Task<UserDetailDTO> CreateUser(RegisterUserDTO registerUserRequest)
         {
@@ -53,6 +57,7 @@ namespace ChatAPI.Services
                 {
                     throw new Exception("Incorrect Password");
                 }
+                //create JWT
                 return userToLogin.ConvertUserToUserDetailDTO();
             }
             catch (Exception)

@@ -1,5 +1,6 @@
 using ChatAPI;
 using ChatAPI.Data;
+using ChatAPI.Options;
 using ChatAPI.Services;
 using ChatAPI.Services.Interface;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -10,6 +11,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSignalR();
 
+
+// setting up options
+builder.Services.Configure<DatabaseOptions>(
+    builder.Configuration.GetSection(DatabaseOptions.DatabaseOption));
+builder.Services.Configure<JWTOptions>(
+    builder.Configuration.GetSection(JWTOptions.JWTOption));
 
 builder.Services.AddCors(option =>
 {
