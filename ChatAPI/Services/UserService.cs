@@ -12,14 +12,12 @@ namespace ChatAPI.Services
     {
         private readonly MongoDBService _mongoDBService;
         private readonly IPasswordHelper _passwordHelper;
-        private readonly JWTOptions _jwtOptions;
         private const string CollectionName = "users";
 
-        public UserService(MongoDBService mongoDBService, IPasswordHelper passwordHelper, IOptions<JWTOptions> jwtOptions)
+        public UserService(MongoDBService mongoDBService, IPasswordHelper passwordHelper)
         {
             _mongoDBService = mongoDBService;
             _passwordHelper = passwordHelper;
-            _jwtOptions = jwtOptions.Value;
         }
         public async Task<UserDetailDTO> CreateUser(RegisterUserDTO registerUserRequest)
         {
@@ -57,7 +55,6 @@ namespace ChatAPI.Services
                 {
                     throw new Exception("Incorrect Password");
                 }
-                //create JWT
                 return userToLogin.ConvertUserToUserDetailDTO();
             }
             catch (Exception)
@@ -71,9 +68,10 @@ namespace ChatAPI.Services
         {
             return await _mongoDBService.GetAllDocument<User>(CollectionName);
         }
-        public async Task<User> GetUserById(string id)
+        public async Task<UserDetailDTO> GetUserById(string id)
         {
-            return await _mongoDBService.GetDocumentById<User>(CollectionName, "_id", id);
+            var user =  await _mongoDBService.GetDocumentById<User>(CollectionName, "_id", id);
+            return user.ConvertUserToUserDetailDTO();
         }
     }
 }

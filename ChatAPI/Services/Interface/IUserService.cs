@@ -6,7 +6,7 @@ namespace ChatAPI.Services.Interface
     {
         Task<UserDetailDTO> CreateUser(RegisterUserDTO registerUserRequest);
         Task<List<User>> GetAllUsers();
-        Task<User> GetUserById(string id);
+        Task<UserDetailDTO> GetUserById(string id);
         Task<UserDetailDTO> LogInUser(LoginUserDTO loginUserRequest);
     }
 }

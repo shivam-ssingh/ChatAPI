@@ -3,7 +3,9 @@ using ChatAPI.Data;
 using ChatAPI.Options;
 using ChatAPI.Services;
 using ChatAPI.Services.Interface;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,8 +46,22 @@ builder.Services.AddControllers()
 
 
 //authentication
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie("Cookie");
-//builder.Services.UseAuthentication();
+builder.Services.AddAuthorization();
+var jwtConfig = builder.Configuration.GetSection(JWTOptions.JWTOption).Get<JWTOptions>();
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, o =>
+    {
+        o.RequireHttpsMetadata = false;
+        o.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+        {
+            IssuerSigningKey =
+            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig.Secret)),
+            ValidIssuer = jwtConfig.Issuer,
+            ValidAudience = jwtConfig.Audience,
+            ClockSkew = TimeSpan.Zero,
+        };
+
+    });
 
 var app = builder.Build();
 
@@ -58,6 +74,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+
+//authentication and authorization
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

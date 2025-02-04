@@ -1,7 +1,18 @@
 ﻿using ChatAPI.Extensions;
 using ChatAPI.Models;
+using ChatAPI.Options;
 using ChatAPI.Services.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json.Linq;
+
+//using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace ChatAPI.Controllers
 {
@@ -10,9 +21,11 @@ namespace ChatAPI.Controllers
     public class UserController : ControllerBase
     {
         private IUserService _userService { get; set; }
-        public UserController(IUserService userService)
+        private readonly JWTOptions _jwtOptions;
+        public UserController(IUserService userService, IOptions<JWTOptions> jwtOptions)
         {
             _userService = userService;
+            _jwtOptions = jwtOptions.Value;
         }
 
 
@@ -23,11 +36,13 @@ namespace ChatAPI.Controllers
             try
             {
                 var createdUser = await _userService.CreateUser(registerRequest);
-                return Ok(createdUser);
+                //create JWT
+                var token = CreateToken(createdUser);
+                return Ok(token);
             }
             catch (Exception ex)
             {
-                if(ex.Message == "Email Already Present")
+                if (ex.Message == "Email Already Present")
                 {
                     //TODO: Use middleware as mentioned here https://learn.microsoft.com/en-us/aspnet/core/web-api/handle-errors?view=aspnetcore-8.0&viewFallbackFrom=aspnetcore-3.0
                     return BadRequest(new { error = ex.Message });
@@ -45,7 +60,8 @@ namespace ChatAPI.Controllers
             try
             {
                 var userLogin = await _userService.LogInUser(loginRequest);
-                return Ok(userLogin);
+                var token = CreateToken(userLogin);
+                return Ok(token);
             }
             catch (Exception ex)
             {
@@ -55,6 +71,50 @@ namespace ChatAPI.Controllers
                 }
                 return Problem(detail: ex.Message, statusCode: StatusCodes.Status500InternalServerError);
             }
+        }
+
+        [Authorize]
+        [HttpGet]
+        [Route("{id}")]
+        public async Task<IActionResult> GetUserById(string id)
+        {
+            try
+            {
+                var userDetails = await _userService.GetUserById(id);
+                return Ok(userDetails);
+            }
+            catch (Exception ex)
+            {
+                if (ex.Message == "Email Not Present")
+                {
+                    return BadRequest(new { error = ex.Message });
+                }
+                return Problem(detail: ex.Message, statusCode: StatusCodes.Status500InternalServerError);
+            }
+        }
+        private string CreateToken(UserDetailDTO user)
+        {
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Secret));
+
+            var credentials  = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            var tokenDescriptor = new SecurityTokenDescriptor()
+            {
+                Subject = new System.Security.Claims.ClaimsIdentity(
+                    [
+                        new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+                        new Claim(JwtRegisteredClaimNames.Email, user.Email),
+
+                    ]),
+                Expires = DateTime.UtcNow.AddMinutes(_jwtOptions.ExpirationInMinutes),
+                SigningCredentials = credentials,
+                Issuer = _jwtOptions.Issuer,
+                Audience = _jwtOptions.Audience,
+            };
+
+            var handler = new JsonWebTokenHandler();
+            var token = handler.CreateToken(tokenDescriptor);
+            return token;
         }
     }
 }
