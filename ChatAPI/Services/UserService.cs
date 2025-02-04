@@ -28,7 +28,7 @@ namespace ChatAPI.Services
                     throw new Exception("Email Already Present");
                 }
                 //hashing technique before inserting in mongo
-                user.PasswordHash = _passwordHelper.HashPassword(registerUserRequest.Password);
+                user.PasswordHash = _passwordHelper.HashPasswordV2(registerUserRequest.Password);
                 await _mongoDBService.CreateDocument(CollectionName, user);
                 var savedUser = await _mongoDBService.GetDocumentById<User>(CollectionName, "Email", user.Email);
                 return savedUser.ConvertUserToUserDetailDTO();
@@ -49,7 +49,7 @@ namespace ChatAPI.Services
                     throw new Exception("Email Not Present");
                 }
                 //check hashed password 
-                if (!_passwordHelper.VerifyPassword(userToLogin.PasswordHash, loginUserRequest.Password))
+                if (!_passwordHelper.VerifyPasswordV2(loginUserRequest.Password, userToLogin.PasswordHash))
                 {
                     throw new Exception("Incorrect Password");
                 }

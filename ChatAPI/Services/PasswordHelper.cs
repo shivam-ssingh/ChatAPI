@@ -113,5 +113,35 @@ namespace ChatAPI.Services
                 | ((uint)(buffer[offset + 3]));
         }
 
+
+
+
+        #region v2
+
+        private const int SaltSize = 16;
+        private const int HashSize = 32;
+        private const int Iterations = 10000;
+
+        private static readonly HashAlgorithmName Algorithm = HashAlgorithmName.SHA256;
+
+        public string HashPasswordV2(string password)
+        {
+            byte[] salt = RandomNumberGenerator.GetBytes(SaltSize);
+            byte[] hash = Rfc2898DeriveBytes.Pbkdf2(password, salt, Iterations,Algorithm, HashSize);
+
+            return $"{Convert.ToHexString(hash)}-{Convert.ToHexString(salt)}";
+        }
+
+        public bool VerifyPasswordV2(string password, string hashedPassword)
+        {
+            string[] parts = hashedPassword.Split('-');
+            byte[] savedHashedPassword = Convert.FromHexString(parts[0]);
+            byte[] salt = Convert.FromHexString(parts[1]);
+
+            byte[] inputHashdPassword = Rfc2898DeriveBytes.Pbkdf2(password, salt,Iterations,Algorithm, HashSize);
+
+            return CryptographicOperations.FixedTimeEquals(savedHashedPassword, inputHashdPassword);
+        }
+        #endregion
     }
 }

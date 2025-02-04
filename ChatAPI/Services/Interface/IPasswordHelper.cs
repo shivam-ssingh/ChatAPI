@@ -7,5 +7,9 @@ namespace ChatAPI.Services.Interface
     {
         string HashPassword(string password);
         bool VerifyPassword(string hashedPassword, string password);
+
+        string HashPasswordV2(string password);
+
+        bool VerifyPasswordV2(string password, string hashedPassword);
     }
 }
