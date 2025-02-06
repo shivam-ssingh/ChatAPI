@@ -16,6 +16,7 @@ namespace ChatAPI.Models
         public string LastName { get; set; }
         [BsonElement("PasswordHash")]
         public string PasswordHash { get; set; }
-
+        [BsonElement("UserName")]
+        public string UserName { get; set; }
     }
 }

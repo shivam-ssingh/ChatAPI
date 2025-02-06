@@ -9,6 +9,7 @@ namespace ChatAPI.Models
 
         //[Required(ErrorMessage = "Last name is required.")]
         public string? LastName { get; set; }
+        public string? UserName { get; set; }
 
         [Required(ErrorMessage = "Email is required.")]
         [EmailAddress(ErrorMessage = "Invalid email address format.")]

@@ -10,7 +10,8 @@ namespace ChatAPI.Extensions
             { 
                 Email = registerUserRequest.Email, 
                 FirstName = registerUserRequest.FirstName, 
-                LastName = registerUserRequest.LastName 
+                LastName = registerUserRequest.LastName,
+                UserName = registerUserRequest.UserName,
             };
         }
 
@@ -22,6 +23,7 @@ namespace ChatAPI.Extensions
                 Email = user.Email,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
+                UserName = user.UserName,
             };
         }
 
