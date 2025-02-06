@@ -38,17 +38,22 @@ namespace ChatAPI.Controllers
                 var createdUser = await _userService.CreateUser(registerRequest);
                 //create JWT
                 var token = CreateToken(createdUser);
-                return Ok(token);
+                return Ok(new AuthDTO() { AuthToken = token});
             }
             catch (Exception ex)
             {
-                if (ex.Message == "Email Already Present")
+                //if (ex.Message == "Email Already Present")
+                //{
+                //    //TODO: Use middleware as mentioned here https://learn.microsoft.com/en-us/aspnet/core/web-api/handle-errors?view=aspnetcore-8.0&viewFallbackFrom=aspnetcore-3.0
+                //    return BadRequest(new { error = ex.Message });
+                //}
+                ////error handling using problem -> https://stackoverflow.com/a/68892997
+                //return Problem(detail: ex.Message, statusCode: StatusCodes.Status500InternalServerError);
+                if (ex.Message == "Email Not Present")
                 {
-                    //TODO: Use middleware as mentioned here https://learn.microsoft.com/en-us/aspnet/core/web-api/handle-errors?view=aspnetcore-8.0&viewFallbackFrom=aspnetcore-3.0
-                    return BadRequest(new { error = ex.Message });
+                    return BadRequest(new { Error = ex.Message });
                 }
-                //error handling using problem -> https://stackoverflow.com/a/68892997
-                return Problem(detail: ex.Message, statusCode: StatusCodes.Status500InternalServerError);
+                return UnprocessableEntity(new { Error = "Some Error Occured", Exception = ex.Message });
             }
         }
 
@@ -61,15 +66,20 @@ namespace ChatAPI.Controllers
             {
                 var userLogin = await _userService.LogInUser(loginRequest);
                 var token = CreateToken(userLogin);
-                return Ok(token);
+                return Ok(new AuthDTO() { AuthToken = token });
             }
             catch (Exception ex)
             {
                 if (ex.Message == "Email Not Present")
                 {
-                    return BadRequest(new { error = ex.Message });
+                    return BadRequest(new { Error = ex.Message });
                 }
-                return Problem(detail: ex.Message, statusCode: StatusCodes.Status500InternalServerError);
+                if (ex.Message == "Incorrect Password")
+                {
+                    return BadRequest(new { Error = ex.Message });
+
+                }
+                return UnprocessableEntity(new { Error = "Some Error Occured", Exception = ex.Message });
             }
         }
 
@@ -87,9 +97,9 @@ namespace ChatAPI.Controllers
             {
                 if (ex.Message == "Email Not Present")
                 {
-                    return BadRequest(new { error = ex.Message });
+                    return BadRequest(new { Error = ex.Message });
                 }
-                return Problem(detail: ex.Message, statusCode: StatusCodes.Status500InternalServerError);
+                return UnprocessableEntity(new { Error = "Some Error Occured", Exception = ex.Message });
             }
         }
         private string CreateToken(UserDetailDTO user)
