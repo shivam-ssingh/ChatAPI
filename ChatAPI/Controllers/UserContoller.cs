@@ -38,7 +38,7 @@ namespace ChatAPI.Controllers
                 var createdUser = await _userService.CreateUser(registerRequest);
                 //create JWT
                 var token = CreateToken(createdUser);
-                return Ok(new AuthDTO() { AuthToken = token});
+                return Ok(new AuthDTO() { AuthToken = token, UserDetails = createdUser});
             }
             catch (Exception ex)
             {
@@ -66,7 +66,7 @@ namespace ChatAPI.Controllers
             {
                 var userLogin = await _userService.LogInUser(loginRequest);
                 var token = CreateToken(userLogin);
-                return Ok(new AuthDTO() { AuthToken = token });
+                return Ok(new AuthDTO() { AuthToken = token, UserDetails = userLogin });
             }
             catch (Exception ex)
             {
