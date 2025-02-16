@@ -28,3 +28,15 @@ https://github.dev/dotnet/AspNetCore/blob/main/src/Identity/Extensions.Core/src/
 
 new hashing changes 
 https://www.youtube.com/watch?v=J4ix8Mhi3rs
+
+understanding secrets in ASP.NET to store database strings and jwt secrets
+https://www.youtube.com/watch?v=PkLLP2tcd28
+
+Understanding options and setup in asp.net 
+https://learn.microsoft.com/en-us/aspnet/core/fundamentals/configuration/options?view=aspnetcore-9.0
+https://www.youtube.com/watch?v=SizJCLcjbOA
+
+
+Setting identity for signalr users
+https://stackoverflow.com/questions/48110615/userid-in-signalr-core
+

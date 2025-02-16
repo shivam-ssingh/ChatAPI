@@ -114,6 +114,7 @@ namespace ChatAPI.Controllers
                     [
                         new Claim(JwtRegisteredClaimNames.Sub, user.Id),
                         new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                        new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName),
 
                     ]),
                 Expires = DateTime.UtcNow.AddMinutes(_jwtOptions.ExpirationInMinutes),
