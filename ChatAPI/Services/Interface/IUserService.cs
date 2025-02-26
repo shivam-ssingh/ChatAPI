@@ -8,5 +8,7 @@ namespace ChatAPI.Services.Interface
         Task<List<User>> GetAllUsers();
         Task<UserDetailDTO> GetUserById(string id);
         Task<UserDetailDTO> LogInUser(LoginUserDTO loginUserRequest);
+
+        Task<UserDetailDTO> HandleGithubCallBack(string code);
     }
 }

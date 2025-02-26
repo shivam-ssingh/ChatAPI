@@ -4,7 +4,8 @@ using ChatAPI.Models;
 using ChatAPI.Options;
 using ChatAPI.Services.Interface;
 using Microsoft.Extensions.Options;
-using MongoDB.Driver;
+using System.Net.Http.Headers;
+using System.Text.Json;
 
 namespace ChatAPI.Services
 {
@@ -13,11 +14,16 @@ namespace ChatAPI.Services
         private readonly MongoDBService _mongoDBService;
         private readonly IPasswordHelper _passwordHelper;
         private const string CollectionName = "users";
+        private readonly GithubAuthOptions _githubAuthOptions;
+        private readonly HttpClient _httpClient;
 
-        public UserService(MongoDBService mongoDBService, IPasswordHelper passwordHelper)
+        public UserService(MongoDBService mongoDBService, IPasswordHelper passwordHelper,
+                           IOptions<GithubAuthOptions> githubAuthOptions, IHttpClientFactory httpClientFactory)
         {
             _mongoDBService = mongoDBService;
             _passwordHelper = passwordHelper;
+            _githubAuthOptions = githubAuthOptions.Value;
+            _httpClient = httpClientFactory.CreateClient();
         }
         public async Task<UserDetailDTO> CreateUser(RegisterUserDTO registerUserRequest)
         {
@@ -73,5 +79,67 @@ namespace ChatAPI.Services
             var user =  await _mongoDBService.GetDocumentById<User>(CollectionName, "_id", id);
             return user.ConvertUserToUserDetailDTO();
         }
+
+        public async Task<UserDetailDTO> HandleGithubCallBack(string code)
+        {
+            try
+            {
+                var clientId = _githubAuthOptions.ClientId;
+                var clientSecret = _githubAuthOptions.ClientSecret;
+
+                var tokenResponse = await _httpClient.PostAsync("https://github.com/login/oauth/access_token",
+                    new FormUrlEncodedContent(new Dictionary<string, string>
+                    {
+                {"client_id", clientId},
+                {"client_secret", clientSecret},
+                {"code", code}
+                    }));
+
+                tokenResponse.EnsureSuccessStatusCode();
+                var content = await tokenResponse.Content.ReadAsStringAsync();
+                var accessToken = content.Split('&')[0].Split('=')[1];
+
+                var request = new HttpRequestMessage(HttpMethod.Get, "https://api.github.com/user");
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+                request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                request.Headers.UserAgent.ParseAdd("ChatApp");
+
+                var userResponse = await _httpClient.SendAsync(request);
+                if (userResponse.IsSuccessStatusCode)
+                {
+                    var userContent = await userResponse.Content.ReadAsStringAsync();
+                    var githubResponse = JsonSerializer.Deserialize<GithubResponse>(userContent);
+                    var newUser = new User()
+                    {
+                        Email = githubResponse.email,
+                        UserName = githubResponse.login,
+                        FirstName = githubResponse.name
+                    };
+
+                    var userWithEmail = await _mongoDBService.GetDocumentById<User>(CollectionName, "Email", newUser.Email);
+                    if (userWithEmail == null)
+                    {
+                        await _mongoDBService.CreateDocument(CollectionName, newUser);
+                        var savedUser = await _mongoDBService.GetDocumentById<User>(CollectionName, "Email", newUser.Email);
+                        return  savedUser.ConvertUserToUserDetailDTO();
+                    }
+                    else
+                    {
+                        return userWithEmail.ConvertUserToUserDetailDTO();
+                    }
+                }
+                throw new Exception();
+
+                //// TODO: Decide if we want to have email as mandatory since github email may be empty
+                //if (email == null)
+                //    throw new Exception("GitHub did not return an email.");
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            
+        }
+
     }
 }

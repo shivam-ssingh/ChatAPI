@@ -7,16 +7,16 @@ namespace ChatAPI.Models
     {
         [BsonId]
         [BsonRepresentation(MongoDB.Bson.BsonType.ObjectId)]
-        public string Id { get; set; }
+        public string? Id { get; set; }
         [BsonElement("Email")]
-        public string Email { get; set; }
+        public string? Email { get; set; }
         [BsonElement("FirstName")]
-        public string FirstName { get; set; }
+        public string? FirstName { get; set; }
         [BsonElement("LastName")]
-        public string LastName { get; set; }
+        public string? LastName { get; set; }
         [BsonElement("PasswordHash")]
-        public string PasswordHash { get; set; }
+        public string? PasswordHash { get; set; }
         [BsonElement("UserName")]
-        public string UserName { get; set; }
+        public string? UserName { get; set; }
     }
 }

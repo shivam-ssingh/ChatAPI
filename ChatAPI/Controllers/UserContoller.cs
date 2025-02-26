@@ -1,5 +1,4 @@
-﻿using ChatAPI.Extensions;
-using ChatAPI.Models;
+﻿using ChatAPI.Models;
 using ChatAPI.Options;
 using ChatAPI.Services.Interface;
 using Microsoft.AspNetCore.Authorization;
@@ -7,11 +6,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json.Linq;
+
 
 //using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Text;
 
 namespace ChatAPI.Controllers
@@ -22,10 +20,17 @@ namespace ChatAPI.Controllers
     {
         private IUserService _userService { get; set; }
         private readonly JWTOptions _jwtOptions;
-        public UserController(IUserService userService, IOptions<JWTOptions> jwtOptions)
+
+        private readonly HttpClient _httpClient;
+        private readonly IConfiguration _config;
+        public UserController(IUserService userService, IOptions<JWTOptions> jwtOptions, 
+                                IConfiguration config, IHttpClientFactory httpClientFactory)
         {
             _userService = userService;
             _jwtOptions = jwtOptions.Value;
+            
+            _config = config;
+            _httpClient = httpClientFactory.CreateClient();
         }
 
 
@@ -126,6 +131,35 @@ namespace ChatAPI.Controllers
             var handler = new JsonWebTokenHandler();
             var token = handler.CreateToken(tokenDescriptor);
             return token;
+        }
+
+
+        [HttpGet("Github/Login")]
+        public IActionResult GitHubLogin()
+        {
+            var clientId = _config["GitHub:ClientId"];
+            var redirectUri = _config["GitHub:RedirectUri"];
+            var scope = "read:user user:email";
+            var githubAuthUrl = $"https://github.com/login/oauth/authorize?client_id={clientId}&redirect_uri={redirectUri}&scope={scope}";
+
+            return Redirect(githubAuthUrl);
+        }
+
+        [HttpGet("GithubCallback")]
+        public async Task<IActionResult> GitHubCallback([FromQuery] string code)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(code))
+                    return BadRequest("GitHub authentication failed.");
+                var user = await _userService.HandleGithubCallBack(code);
+                var token = CreateToken(user);
+                return Ok(new AuthDTO() { AuthToken = token, UserDetails = user });
+            }
+            catch (Exception ex)
+            {
+                return UnprocessableEntity(new { Error = "Some Error Occured", Exception = ex.Message });
+            }
         }
     }
 }

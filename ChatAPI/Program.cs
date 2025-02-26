@@ -3,6 +3,7 @@ using ChatAPI.Data;
 using ChatAPI.Options;
 using ChatAPI.Services;
 using ChatAPI.Services.Interface;
+using ChatAPI.Services.Quiz;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -21,6 +22,8 @@ builder.Services.Configure<DatabaseOptions>(
     builder.Configuration.GetSection(DatabaseOptions.DatabaseOption));
 builder.Services.Configure<JWTOptions>(
     builder.Configuration.GetSection(JWTOptions.JWTOption));
+builder.Services.Configure<GithubAuthOptions>(
+    builder.Configuration.GetSection(GithubAuthOptions.GithubAuthOption));
 
 builder.Services.AddCors(option =>
 {
@@ -29,6 +32,8 @@ builder.Services.AddCors(option =>
         builder.WithOrigins("http://localhost:4200").AllowAnyHeader().AllowAnyMethod().AllowCredentials(); 
     });
 });
+
+builder.Services.AddHttpClient();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
