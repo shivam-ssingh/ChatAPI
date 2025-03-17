@@ -96,3 +96,9 @@ Github callback response
 ```
 
 TODO: Decide what to do if the email is not present in github response. Make it non-mandatory?
+
+
+# .NET Dockerize
+https://learn.microsoft.com/en-us/aspnet/core/host-and-deploy/docker/building-net-docker-images?view=aspnetcore-9.0
+https://medium.com/@marcus121neo/asp-net-core-multi-environment-setup-with-docker-7591a872bacc
+https://stackoverflow.com/a/69738798

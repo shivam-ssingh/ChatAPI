@@ -3,7 +3,6 @@ using ChatAPI.Data;
 using ChatAPI.Options;
 using ChatAPI.Services;
 using ChatAPI.Services.Interface;
-using ChatAPI.Services.Quiz;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
