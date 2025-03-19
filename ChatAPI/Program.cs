@@ -27,8 +27,8 @@ builder.Services.Configure<GithubAuthOptions>(
 builder.Services.AddCors(option =>
 {
     option.AddPolicy("frontEnd", builder => 
-    { 
-        //builder.WithOrigins("http://localhost:4200").AllowAnyHeader().AllowAnyMethod().AllowCredentials(); 
+    {
+        builder.WithOrigins("http://localhost:4200").AllowAnyHeader().AllowAnyMethod().AllowCredentials();
         builder.WithOrigins("https://chatappui-gs4s.onrender.com").AllowAnyHeader().AllowAnyMethod().AllowCredentials(); 
     });
 });
