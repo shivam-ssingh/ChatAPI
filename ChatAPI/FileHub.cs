@@ -9,34 +9,42 @@ namespace ChatAPI
     {
         //in memory 
         private static readonly ConcurrentDictionary<string, HashSet<string>> _sessions = new(); 
+        private static readonly ConcurrentDictionary<string, HashSet<string>> _userPublicKeys = new(); 
+        private static readonly ConcurrentDictionary<string, HashSet<string>> _sessionCreator = new(); 
 
         //creating session
-        public async Task<string> CreateSession()
+        public async Task<string> CreateSession(string publicKey,string userName)
         {
             string sessionId = Guid.NewGuid().ToString(); 
 
             // Create a new session and add the current user to it
             var connectedClients = new HashSet<string> { Context.ConnectionId };
             _sessions[sessionId] = connectedClients;
-
+            _userPublicKeys[sessionId] = new HashSet<string> { publicKey };
+            _sessionCreator[sessionId] = new HashSet<string> { userName };
             await Groups.AddToGroupAsync(Context.ConnectionId, sessionId);
             Console.WriteLine($"New session created: {sessionId} by connection {Context.ConnectionId}");
 
             return sessionId;
         }
 
-        public async Task<object> JoinSpecificSession(string sessionId, string userName)
+        public async Task<object> JoinSpecificSession(string sessionId, string userName, string publicKey)
         {
             if (!_sessions.ContainsKey(sessionId))
             {
                 return new { success = false, message = "Session not found" };
             }
+            if (_sessions[sessionId].Count > 2) //for now we're limiting the connection to two.
+            {
+                return new { success = false, message = "Session full" };
+            }
 
             _sessions[sessionId].Add(Context.ConnectionId);
+            _userPublicKeys[sessionId].Add(publicKey);
 
             // Add the user to the SignalR group and send other members message
             await Groups.AddToGroupAsync(Context.ConnectionId, sessionId);
-            await Clients.Group(sessionId).SendAsync("PeerJoined", Context.ConnectionId, userName);
+            await Clients.Group(sessionId).SendAsync("PeerJoined", Context.ConnectionId, userName, new { publicKey = _userPublicKeys[sessionId].ToList()} , _sessionCreator[sessionId].First());
 
             Console.WriteLine($"Connection {Context.UserIdentifier} {Context.ConnectionId} joined session: {sessionId}");
             //Console.WriteLine($"{JsonSerializer.Serialize(Context)}");

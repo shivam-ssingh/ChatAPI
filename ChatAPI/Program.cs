@@ -105,5 +105,6 @@ app.MapControllers();
 
 app.UseCors("frontEnd");
 app.MapHub<ChatHub>("/chat");
+app.MapHub<FileHub>("/fileHub");
 
 app.Run();
