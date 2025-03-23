@@ -28,8 +28,7 @@ builder.Services.AddCors(option =>
 {
     option.AddPolicy("frontEnd", builder => 
     {
-        builder.WithOrigins("http://localhost:4200").AllowAnyHeader().AllowAnyMethod().AllowCredentials();
-        builder.WithOrigins("https://chatappui-gs4s.onrender.com").AllowAnyHeader().AllowAnyMethod().AllowCredentials(); 
+        builder.WithOrigins("http://localhost:4200", "https://chatappui-gs4s.onrender.com").AllowAnyHeader().AllowAnyMethod().AllowCredentials();
     });
 });
 
@@ -76,7 +75,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             {
                 var accessToken = context.Request.Query["access_token"];
                 var path = context.HttpContext.Request.Path;
-                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/chat"))
+                if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/fileHub") || path.StartsWithSegments("/chat")))
                 {
                     context.Token = accessToken;
                 }
@@ -97,13 +96,14 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 
+app.UseCors("frontEnd");
+
 //authentication and authorization
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
-app.UseCors("frontEnd");
 app.MapHub<ChatHub>("/chat");
 app.MapHub<FileHub>("/fileHub");
 

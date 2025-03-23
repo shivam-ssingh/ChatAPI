@@ -1,4 +1,6 @@
-# Resources
+﻿# Resources
+
+## SignalR
 
 Good walkthrough of signalr chatapp in .NET MVC
 https://www.youtube.com/watch?v=_gJ0NbNKKZg
@@ -12,6 +14,8 @@ https://stackoverflow.com/questions/63342818/signalr-with-angular-10-and-asp-net
 official doc walkthrough
 https://learn.microsoft.com/en-us/aspnet/signalr/overview/getting-started/tutorial-getting-started-with-signalr
 
+Understanding the JWT Authentication and authorization in signalr events
+https://learn.microsoft.com/en-us/aspnet/core/signalr/authn-and-authz?view=aspnetcore-9.0#built-in-jwt-authentication
 ## password hashing
 
 https://dotnettutorials.net/lesson/how-to-store-password-in-hash-format-in-asp-net-core-web-api/
@@ -35,6 +39,7 @@ https://www.youtube.com/watch?v=SizJCLcjbOA
 Setting identity for signalr users
 https://stackoverflow.com/questions/48110615/userid-in-signalr-core
 
+## Github ouath
 Github Setup for .net web api
 https://khalidabuhakmeh.com/github-openid-auth-aspnet-core-apps
 https://www.youtube.com/watch?v=PUXpfr1LzPE
@@ -99,9 +104,24 @@ TODO: Decide what to do if the email is not present in github response. Make it 
 
 ---
 
-# .NET Dockerize
+## .NET Dockerize
 How to dockerize a .NET API:
 https://learn.microsoft.com/en-us/aspnet/core/host-and-deploy/docker/building-net-docker-images?view=aspnetcore-9.0
 https://medium.com/@marcus121neo/asp-net-core-multi-environment-setup-with-docker-7591a872bacc
 environment variables(app setting):
 https://stackoverflow.com/a/69738798
+
+## Funny behaviour noticed
+
+After adding authorize on the hub, the request from UI for stale token was failing, but the in network tab it displayed was CORS error!
+Checking for CORS error on Authentication failure led to https://stackoverflow.com/a/67354867 
+UseCors Middleware must come before UseAuthorization middleware.
+
+>Chatgpt Answer
+ASP.NET Core does not automatically apply CORS to failed requests, unless you've enabled the CORS policy before those failures are triggered.
+
+So when:
+    [Authorize] returns 401
+    And CORS middleware hasn't yet run
+    The response doesn't include Access-Control-Allow-Origin
+The browser blocks it → and you see that cryptic error.

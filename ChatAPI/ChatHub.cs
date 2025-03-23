@@ -8,6 +8,7 @@ using System.Security.Claims;
 
 namespace ChatAPI
 {
+    [Authorize]
     public class ChatHub : Hub
     {
         private SharedDBDictionary _sharedDB;

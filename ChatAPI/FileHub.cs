@@ -1,10 +1,12 @@
 ﻿using ChatAPI.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using System.Collections.Concurrent;
 using System.Text.Json;
 
 namespace ChatAPI
 {
+    [Authorize]
     public class FileHub : Hub
     {
         //in memory 
