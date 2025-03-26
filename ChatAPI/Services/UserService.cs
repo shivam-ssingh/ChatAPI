@@ -109,6 +109,10 @@ namespace ChatAPI.Services
                 {
                     var userContent = await userResponse.Content.ReadAsStringAsync();
                     var githubResponse = JsonSerializer.Deserialize<GithubResponse>(userContent);
+                    if (githubResponse.email is null)
+                    {
+                        throw new Exception("GitHub did not return an email.");
+                    }
                     var newUser = new User()
                     {
                         Email = githubResponse.email,
@@ -134,8 +138,9 @@ namespace ChatAPI.Services
                 //if (email == null)
                 //    throw new Exception("GitHub did not return an email.");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.Write(ex.ToString());
                 throw;
             }
             

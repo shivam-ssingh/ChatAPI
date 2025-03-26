@@ -117,11 +117,10 @@ After adding authorize on the hub, the request from UI for stale token was faili
 Checking for CORS error on Authentication failure led to https://stackoverflow.com/a/67354867 
 UseCors Middleware must come before UseAuthorization middleware.
 
->Chatgpt Answer
-ASP.NET Core does not automatically apply CORS to failed requests, unless you've enabled the CORS policy before those failures are triggered.
-
-So when:
+>   Chatgpt Answer
+    ASP.NET Core does not automatically apply CORS to failed requests, unless you've enabled the CORS policy before those failures are triggered.
+    So when:
     [Authorize] returns 401
     And CORS middleware hasn't yet run
     The response doesn't include Access-Control-Allow-Origin
-The browser blocks it → and you see that cryptic error.
+    The browser blocks it → and you see that cryptic error.

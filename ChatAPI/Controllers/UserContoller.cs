@@ -158,6 +158,10 @@ namespace ChatAPI.Controllers
             }
             catch (Exception ex)
             {
+                if (ex.Message.Contains("GitHub") && ex.Message.Contains("email"))
+                {
+                    return UnprocessableEntity(new { Error = "GithubEmail", Exception = ex.Message });
+                }
                 return UnprocessableEntity(new { Error = "Some Error Occured", Exception = ex.Message });
             }
         }
